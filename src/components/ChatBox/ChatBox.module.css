@@ -1,0 +1,27 @@
+.Container {
+    margin: 10px
+}
+
+
+
+.ChatContainer {
+    margin: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+
+
+.ConnectionIdInput {
+    width: 300px;
+}
+
+
+.MessageReceivedContainer {
+    margin-top: 40px;
+}
+
+
+.ListOfAllUserRegisterdContianer {
+    margin-top: 40px;
+}
