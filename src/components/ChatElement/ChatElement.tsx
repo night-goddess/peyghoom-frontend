@@ -1,4 +1,4 @@
-import { Chat, Message } from "@/types/Messenger"
+import { Message } from "@/types/Messenger"
 
 
 

@@ -1,6 +1,6 @@
 "use client";
 import styles from "./ChatBox.module.css";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import * as signalR from '@microsoft/signalr';
 import { Button, TextField } from "@mui/material"
 import { storageKeys } from "@/configs/storageKeys";
@@ -18,7 +18,7 @@ export default function ChatBox() {
     const [currentUser, setCurrentUser] = useState<User>();
     const [targetConnectionId, setTargetConnectionId] = useState("");
     const [messageReceivedList, setMessageReceivedList] = useState<string[]>([]);
-    const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
+    const [onlineUsers] = useState<User[]>([]);
     const [chats, setChats] = useState<Chat[]>([]);
 
 
@@ -26,16 +26,15 @@ export default function ChatBox() {
 
 
     const connection = useMemo(() => {
-        var token = sessionStorage?.getItem(storageKeys.accessToken);
-        console.log(token);
+        if (typeof window === "undefined") return;
+        const token = sessionStorage?.getItem(storageKeys.accessToken);
         if (token == undefined || token == null || token == "") {
             router.push(paths.login);
             return;
         }
         
-        if (typeof window === "undefined" || !token) return;
         if (token == null) return;
-        let connection = new signalR.HubConnectionBuilder()
+        const connection = new signalR.HubConnectionBuilder()
             .withUrl(`${urls.baseUrl}/chatHub`, { accessTokenFactory: () => token || "" })
             .build();
 
@@ -43,6 +42,7 @@ export default function ChatBox() {
             console.log(message);
             setMessageReceivedList(prev => [...prev, message]);
         });
+
 
 
         connection.on("ReceiveRegister", (currentUser) => {
@@ -66,7 +66,7 @@ export default function ChatBox() {
             .then(() => console.log("connection started"));
 
         return connection;
-    }, []);
+    }, [router]);
 
     const onSendHandler = () => {
         console.log("send message to connection id: ", targetConnectionId)

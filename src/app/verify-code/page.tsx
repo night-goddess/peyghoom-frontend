@@ -22,7 +22,7 @@ const VerifyCodePage = () => {
 
 
     const submitHandler = () => {
-        var token = sessionStorage.getItem(storageKeys.verifyToken);
+        const token = sessionStorage.getItem(storageKeys.verifyToken);
         console.log(token, code);
         axios.post(`${urls.baseUrl}/auth/verification-code/verify`, 
          {
