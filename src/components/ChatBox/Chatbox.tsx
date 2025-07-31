@@ -8,6 +8,7 @@ import { urls } from "@/configs/api";
 import { useRouter } from 'next/navigation';
 import { Chat, User } from "@/types/Messenger";
 import { ChatList } from "../ChatList/ChatList";
+import { paths } from "@/configs/paths";
 
 
 
@@ -18,30 +19,24 @@ export default function ChatBox() {
     const [targetConnectionId, setTargetConnectionId] = useState("");
     const [messageReceivedList, setMessageReceivedList] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
-    const [accessToken, setAccessToken] = useState<string | null>();
     const [chats, setChats] = useState<Chat[]>([]);
 
 
     const router = useRouter();
 
-    useEffect(() => {
-        if (typeof window === "undefined") return;
-
-        setAccessToken(sessionStorage?.getItem(storageKeys.accessToken))
-    }, [])
-
 
     const connection = useMemo(() => {
-        if (typeof window === "undefined" || !accessToken) return;
-        if (accessToken == undefined || accessToken == null || accessToken == "") {
-            // router.push(paths.login);
+        var token = sessionStorage?.getItem(storageKeys.accessToken);
+        console.log(token);
+        if (token == undefined || token == null || token == "") {
+            router.push(paths.login);
             return;
         }
-
-        setAccessToken(accessToken);
-        console.log(accessToken)
+        
+        if (typeof window === "undefined" || !token) return;
+        if (token == null) return;
         let connection = new signalR.HubConnectionBuilder()
-            .withUrl(`${urls.baseUrl}/chatHub`, { accessTokenFactory: () => accessToken })
+            .withUrl(`${urls.baseUrl}/chatHub`, { accessTokenFactory: () => token || "" })
             .build();
 
         connection.on("ReceiveMessage", (message) => {
@@ -71,7 +66,7 @@ export default function ChatBox() {
             .then(() => console.log("connection started"));
 
         return connection;
-    }, [accessToken]);
+    }, []);
 
     const onSendHandler = () => {
         console.log("send message to connection id: ", targetConnectionId)
