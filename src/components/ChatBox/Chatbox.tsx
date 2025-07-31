@@ -4,14 +4,12 @@ import { useEffect, useMemo, useState } from "react";
 import * as signalR from '@microsoft/signalr';
 import { Button, TextField } from "@mui/material"
 import { storageKeys } from "@/configs/storageKeys";
-import { paths } from "@/configs/paths";
 import { urls } from "@/configs/api";
 import { useRouter } from 'next/navigation';
+import { Chat, User } from "@/types/Messenger";
+import { ChatList } from "../ChatList/ChatList";
 
-type User = {
-    userName: string,
-    connectionId: string
-}
+
 
 export default function ChatBox() {
 
@@ -20,21 +18,26 @@ export default function ChatBox() {
     const [targetConnectionId, setTargetConnectionId] = useState("");
     const [messageReceivedList, setMessageReceivedList] = useState<string[]>([]);
     const [onlineUsers, setOnlineUsers] = useState<User[]>([]);
-    const [accessToken, setAccessToken] = useState(sessionStorage.getItem(storageKeys.accessToken));
+    const [accessToken, setAccessToken] = useState<string | null>();
+    const [chats, setChats] = useState<Chat[]>([]);
 
 
     const router = useRouter();
 
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+
+        setAccessToken(sessionStorage?.getItem(storageKeys.accessToken))
+    }, [])
 
 
     const connection = useMemo(() => {
-        if(typeof window === "undefined" || !accessToken) return;
-        const storageToken = sessionStorage.getItem(storageKeys.accessToken);
+        if (typeof window === "undefined" || !accessToken) return;
         if (accessToken == undefined || accessToken == null || accessToken == "") {
-            router.push(paths.login);
+            // router.push(paths.login);
             return;
         }
-        
+
         setAccessToken(accessToken);
         console.log(accessToken)
         let connection = new signalR.HubConnectionBuilder()
@@ -53,9 +56,15 @@ export default function ChatBox() {
         });
 
 
-        connection.on("ClientsUpdated", (onlineUsers) => {
-            console.log("user list: ", onlineUsers);
-            setOnlineUsers(onlineUsers);
+        // connection.on("ClientsUpdated", (onlineUsers) => {
+        //     console.log("user list: ", onlineUsers);
+        //     setOnlineUsers(onlineUsers);
+        // });
+
+
+        connection.on("GetChats", (chats: Chat[]) => {
+            console.log("user chats: ", chats);
+            setChats(chats);
         });
 
         connection.start()
@@ -116,7 +125,7 @@ export default function ChatBox() {
             </div>
             <br />
             <div className={styles.ListOfAllUserRegisterd}>
-                <h2>User List: </h2>
+                <h2 style={{  fontWeight: "bold", fontSize: "1.5rem" }}>User List: </h2>
                 {onlineUsers.map((user, index) => {
                     return (
                         <div key={index}>
@@ -124,6 +133,10 @@ export default function ChatBox() {
                         </div>
                     )
                 })}
+            </div>
+            <div>
+                <h1 style={{  fontWeight: "bold", fontSize: "1.5rem" }}>Chat List:</h1>
+                <ChatList chat={chats} />
             </div>
         </div>
     );

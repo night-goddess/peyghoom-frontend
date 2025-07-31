@@ -1,3 +1,4 @@
+"use clinet"
 import ChatBox from "@/components/ChatBox/Chatbox";
 
 

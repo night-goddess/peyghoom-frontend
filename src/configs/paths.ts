@@ -1,4 +1,5 @@
 export const paths = {
     login: "/login",
-    chat: "/chat"
+    chat: "/chat",
+    verifyCode: "/verify-code",
 }
